@@ -17,7 +17,6 @@ public class ClientChatHandler implements Runnable {
     private List<ClientChatHandler> connectedClients;
     private PrintWriter outToClient;
     private BufferedReader inFromClient;
-    private String username;
 
     public ClientChatHandler(Socket socket, List<ClientChatHandler> clients) throws IOException {
         this.clientSocket = socket;
@@ -29,7 +28,6 @@ public class ClientChatHandler implements Runnable {
     @Override
     public void run() {
         try {
-//            requestUsername();
             String inputLine;
             while ((inputLine = inFromClient.readLine()) != null) {
                 broadcastMessage(inputLine);
