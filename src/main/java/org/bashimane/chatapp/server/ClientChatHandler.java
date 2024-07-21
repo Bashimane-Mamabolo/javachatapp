@@ -17,6 +17,7 @@ public class ClientChatHandler implements Runnable {
     private final List<ClientChatHandler> connectedClients;
     private final PrintWriter outToClient;
     private final BufferedReader inFromClient;
+    private String username;
 
     public ClientChatHandler(Socket socket, List<ClientChatHandler> clients) throws IOException {
         this.clientSocket = socket;
@@ -28,6 +29,7 @@ public class ClientChatHandler implements Runnable {
     @Override
     public void run() {
         try {
+            requestUsername();
             String inputLine;
             while ((inputLine = inFromClient.readLine()) != null) {
                 broadcastMessage(inputLine);
@@ -37,6 +39,12 @@ public class ClientChatHandler implements Runnable {
         } finally {
             closeConnections();
         }
+    }
+
+    private void requestUsername() throws IOException {
+        outToClient.println("Enter your username: ");
+        username = inFromClient.readLine();
+        broadcastMessage("User " + username + " has joined the chat.");
     }
 
     private void broadcastMessage(String message) {
@@ -54,7 +62,7 @@ public class ClientChatHandler implements Runnable {
             logger.log(Level.SEVERE, "An error occurred while closing connections: " + ex.getMessage(), ex);
         } finally {
             connectedClients.remove(this);
-            broadcastMessage("A client has disconnected.");
+            broadcastMessage("User " + username + " has left the chat.");
             logger.info("Client disconnected: " + clientSocket);
         }
     }
