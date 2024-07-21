@@ -6,13 +6,17 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 
 
 public class ChatClientGUI extends JFrame {
+
     private JTextArea messageArea;
     private JTextField textField;
     private ChatClient client;
+    private JButton exitButton;
 
     public ChatClientGUI() {
         super("Chat Application");
@@ -23,15 +27,25 @@ public class ChatClientGUI extends JFrame {
         messageArea.setEditable(false);
         add(new JScrollPane(messageArea), BorderLayout.CENTER);
 
-        textField = new JTextField();
-        textField.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                client.sendMessage(textField.getText());
-                textField.setText("");
-            }
-        });
+        // Prompt for username
+        String name = JOptionPane.showInputDialog(this, "Enter your name:", "Name Entry", JOptionPane.PLAIN_MESSAGE);
+        this.setTitle("Chat Application - " + name); // Set window title to include username
 
+        textField = new JTextField();
+        textField.addActionListener(e -> {
+            String message = "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + name + ": " + textField.getText();
+            client.sendMessage(message);
+            textField.setText("");
+        });
         add(textField, BorderLayout.SOUTH);
+
+        // Initialize the exit button
+        exitButton = new JButton("Exit");
+        exitButton.addActionListener(e -> System.exit(0)); // Exit the application
+        JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(textField, BorderLayout.CENTER);
+        bottomPanel.add(exitButton, BorderLayout.EAST);
+        add(bottomPanel, BorderLayout.SOUTH);
 
         // Initialize and start the ChatClient
         try {
