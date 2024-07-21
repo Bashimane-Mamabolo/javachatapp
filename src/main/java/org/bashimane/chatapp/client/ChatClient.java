@@ -7,7 +7,6 @@ import java.util.function.Consumer;
 public class ChatClient {
 
     private Socket clientSocket;
-//    private BufferedReader clientInput;
     private PrintWriter messageToServer;
     private BufferedReader messageFromServer;
     private Consumer<String> onMessageReceived;
@@ -32,7 +31,6 @@ public class ChatClient {
     }
 
     public ChatClient(String serverAddress, int serverPort, Consumer<String> onMessageReceived ) throws IOException {
-
         this.clientSocket = new Socket(serverAddress, serverPort);
         this.messageFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         this.messageToServer = new PrintWriter(clientSocket.getOutputStream(), true);

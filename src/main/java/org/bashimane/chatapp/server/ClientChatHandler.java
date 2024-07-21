@@ -30,6 +30,10 @@ public class ClientChatHandler implements Runnable {
         try {
             String inputLine;
             while ((inputLine = inFromClient.readLine()) != null) {
+                if (inputLine.equalsIgnoreCase("exit")) {
+                    broadcastMessage("A client has disconnected.");
+                    break;
+                }
                 broadcastMessage(inputLine);
             }
         } catch (IOException ex) {
@@ -41,6 +45,7 @@ public class ClientChatHandler implements Runnable {
 
 
     private void broadcastMessage(String message) {
+        logger.info("Broadcasting message: " + message);
         for (ClientChatHandler client : connectedClients) {
             client.outToClient.println(message);
         }
@@ -56,6 +61,7 @@ public class ClientChatHandler implements Runnable {
         } finally {
             connectedClients.remove(this);
             logger.info("Client disconnected: " + clientSocket);
+            broadcastMessage("A client has left the chat.");
         }
     }
 }

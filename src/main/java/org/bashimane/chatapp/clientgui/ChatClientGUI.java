@@ -38,6 +38,9 @@ public class ChatClientGUI extends JFrame {
 
         // Prompt for username
         String name = JOptionPane.showInputDialog(this, "Enter your name:", "Name Entry", JOptionPane.PLAIN_MESSAGE);
+        if (name == null || name.trim().isEmpty()) {
+            name = "Anonymous";
+        }
         this.setTitle("Chat Application - " + name); // Set window title to include username
 
         // Text field for typing messages
@@ -45,8 +48,9 @@ public class ChatClientGUI extends JFrame {
         textField.setFont(textFont);
         textField.setForeground(textColor);
         textField.setBackground(backgroundColor);
+        String finalName = name;
         textField.addActionListener(e -> {
-            String message = "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + name + ": " + textField.getText();
+            String message = "[" + new SimpleDateFormat("HH:mm:ss").format(new Date()) + "] " + finalName + ": " + textField.getText();
             client.sendMessage(message);
             textField.setText("");
         });
@@ -56,9 +60,10 @@ public class ChatClientGUI extends JFrame {
         exitButton.setFont(buttonFont);
         exitButton.setBackground(buttonColor);
         exitButton.setForeground(Color.WHITE);
+        String finalName1 = name;
         exitButton.addActionListener(e -> {
             // Send a departure message to the server
-            String departureMessage = name + " has left the chat.";
+            String departureMessage = finalName1 + " has left the chat.";
             client.sendMessage(departureMessage);
 
             // Delay to ensure the message is sent before exiting
