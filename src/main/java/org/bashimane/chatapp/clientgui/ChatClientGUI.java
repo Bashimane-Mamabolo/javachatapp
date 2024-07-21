@@ -4,7 +4,6 @@ import org.bashimane.chatapp.client.ChatClient;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
