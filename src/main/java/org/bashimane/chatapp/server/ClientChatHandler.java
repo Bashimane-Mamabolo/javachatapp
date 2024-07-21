@@ -13,10 +13,10 @@ public class ClientChatHandler implements Runnable {
 
     private static final Logger logger = Logger.getLogger(ClientChatHandler.class.getName());
 
-    private final Socket clientSocket;
-    private final List<ClientChatHandler> connectedClients;
-    private final PrintWriter outToClient;
-    private final BufferedReader inFromClient;
+    private Socket clientSocket;
+    private List<ClientChatHandler> connectedClients;
+    private PrintWriter outToClient;
+    private BufferedReader inFromClient;
     private String username;
 
     public ClientChatHandler(Socket socket, List<ClientChatHandler> clients) throws IOException {

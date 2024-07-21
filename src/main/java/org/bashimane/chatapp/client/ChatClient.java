@@ -2,68 +2,68 @@ package org.bashimane.chatapp.client;
 
 import java.io.*;
 import java.net.*;
+import java.util.function.Consumer;
 
 public class ChatClient {
 
     private Socket clientSocket;
-    private BufferedReader clientInput;
+//    private BufferedReader clientInput;
     private PrintWriter messageToServer;
     private BufferedReader messageFromServer;
+    private Consumer<String> onMessageReceived;
 
     public static void main(String[] args) {
         try {
-            ChatClient client = new ChatClient("localhost", 6888);
-            client.start();
+            ChatClient client = new ChatClient("localhost", 6888, System.out::println);
+            client.startClient();
+
+            BufferedReader userInput = new BufferedReader(new InputStreamReader(System.in));
+            String userMessage;
+            while ((userMessage = userInput.readLine()) != null) {
+                client.sendMessage(userMessage);
+                if (userMessage.equalsIgnoreCase("exit")) {
+                    break;
+                }
+            }
+            client.closeResources();
         } catch (IOException e) {
             System.err.println("Error starting client: " + e.getMessage());
         }
     }
 
-    public ChatClient(String address, int port) throws IOException {
-        try {
-            clientSocket = new Socket(address, port);
-            System.out.println("Connected to the chat server");
+    public ChatClient(String serverAddress, int serverPort, Consumer<String> onMessageReceived ) throws IOException {
 
-            clientInput = new BufferedReader(new InputStreamReader(System.in));
-            messageToServer = new PrintWriter(clientSocket.getOutputStream(), true);
-            messageFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        } catch (UnknownHostException u) {
-            throw new IOException("Host unknown: " + u.getMessage(), u);
-        } catch (IOException i) {
-            throw new IOException("Error initializing client: " + i.getMessage(), i);
-        }
+        this.clientSocket = new Socket(serverAddress, serverPort);
+        this.messageFromServer = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        this.messageToServer = new PrintWriter(clientSocket.getOutputStream(), true);
+        this.onMessageReceived = onMessageReceived;
+        System.out.println("Connected to the chat server");
+
     }
 
-    public void start() {
-        try {
-            String line = "";
-            while (!line.equalsIgnoreCase("exit")) {
-                line = clientInput.readLine();
-                if (line != null) {
-                    messageToServer.println(line);
-                    String response = messageFromServer.readLine();
-                    if (response != null) {
-                        System.out.println(response);
-                    } else {
-                        System.out.println("Server closed connection");
-                        break;
-                    }
+    public void sendMessage(String msg) {
+        messageToServer.println(msg);
+    }
+
+    public void startClient() {
+        new Thread(() -> {
+            try {
+                String line;
+                while ((line = messageFromServer.readLine()) != null) {
+                    onMessageReceived.accept(line);
                 }
+            } catch (IOException e) {
+                e.printStackTrace();
+            } finally {
+                closeResources();
             }
-        } catch (IOException i) {
-            System.err.println("Error during communication: " + i.getMessage());
-        } finally {
-            closeResources();
-        }
+        }).start();
     }
 
     private void closeResources() {
         try {
             if (clientSocket != null && !clientSocket.isClosed()) {
                 clientSocket.close();
-            }
-            if (clientInput != null) {
-                clientInput.close();
             }
             if (messageToServer != null) {
                 messageToServer.close();
